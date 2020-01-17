@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { Component } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -9,14 +9,20 @@ import {
   AsyncStorage
 } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
+import { render } from "react-dom";
 
-export default function InputScreen() {
-  const [type, setType] = useState("");
-  const [text, onChangeText] = useState("");
+export default class InputScreen extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      type: "",
+      text: ""
+    };
+  }
 
-  useEffect(() => {
-    initialize();
-  }, []);
+  async componentDidMount() {
+    await this.initialize();
+  }
 
   initialize = async () => {
     let newActivity = [];
@@ -26,24 +32,21 @@ export default function InputScreen() {
 
   addNewItem = async () => {
     try {
-      var activities = await AsyncStorage.getItem(type);
-      let newActivity = text.toString();
-      if (activities != null) {
-        activities = JSON.parse(activities);
-        console.log(activities);
+      const { type, text } = this.state;
+      console.log("Type: ", type);
+      let activities = [];
+      activities = await AsyncStorage.getItem(type);
+      activities = JSON.parse(activities);
+      const newActivity = text.toString();
+      if (activities.length > 0) {
+        console.log("activities: ", activities);
         activities.push(newActivity);
-        try {
-          await AsyncStorage.setItem(type, JSON.stringify(activities));
-        } catch {
-          console.warn(error);
-        }
+        await AsyncStorage.setItem(type, JSON.stringify(activities));
       } else {
-        try {
-          console.log(newActivity);
-          await AsyncStorage.setItem(type, JSON.stringify(newActivity));
-        } catch (error) {
-          console.warn(error);
-        }
+        console.log("newActivity: ", newActivity);
+        console.log("type: ", type);
+        activities.push(newActivity);
+        await AsyncStorage.setItem(type, JSON.stringify(activities));
       }
     } catch (error) {
       console.warn(error);
@@ -60,66 +63,70 @@ export default function InputScreen() {
     }
   };
 
-  function ClearStore() {
+  clearStore = () => {
     AsyncStorage.clear();
-  }
+  };
 
-  return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={{
-        flex: 1,
-        flexDirection: "column",
-        justifyContent: "flex-start"
-      }}
-    >
-      <TextInput
-        style={{
-          height: 40,
-          width: 250,
-          borderColor: "gray",
-          borderWidth: 1,
-          margin: 35,
-          paddingLeft: 10,
-          borderRadius: 10,
-          borderWidth: 2,
-          borderColor: "purple",
-          alignSelf: "center"
-        }}
-        onChangeText={text => onChangeText(text)}
-        value={text}
-      />
-      <Picker
-        selectedValue={type}
-        style={{
-          height: 50,
-          width: 200,
-          margin: 15,
-          borderRadius: 50,
-          borderWidth: 15,
-          borderColor: "purple",
-          alignSelf: "center"
-        }}
-        onValueChange={itemValue => {
-          setType(itemValue);
+  render() {
+    const { text, type } = this.state;
+    return (
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={{
+          flex: 1,
+          flexDirection: "column",
+          justifyContent: "flex-start"
         }}
       >
-        <Picker.Item label="Mechanic" value="Mechanic" />
-        <Picker.Item label="Theme" value="Theme" />
-      </Picker>
-      <View style={{ padding: 20, alignItems: "flex-end" }}>
-        <Button
-          style={{ paddingLeft: 50, alignSelf: "stretch" }}
-          color="purple"
-          title="Enter"
-          onPress={() => {
-            addNewItem();
-            displayItems();
+        <TextInput
+          style={{
+            height: 40,
+            width: 250,
+            borderColor: "gray",
+            borderWidth: 1,
+            margin: 35,
+            paddingLeft: 10,
+            borderRadius: 10,
+            borderWidth: 2,
+            borderColor: "purple",
+            alignSelf: "center"
           }}
+          onChangeText={text => this.setState({ text: text })}
+          value={text}
         />
-      </View>
-    </ScrollView>
-  );
+        <Picker
+          selectedValue={type}
+          style={{
+            height: 50,
+            width: 200,
+            margin: 15,
+            borderRadius: 50,
+            borderWidth: 15,
+            borderColor: "purple",
+            alignSelf: "center"
+          }}
+          onValueChange={itemValue => {
+            console.log("onValueChange: ", itemValue);
+            this.setState({ type: itemValue });
+          }}
+        >
+          <Picker.Item label="Mechanic" value="Mechanic" />
+          <Picker.Item label="Theme" value="Theme" />
+        </Picker>
+        <View style={{ padding: 20, alignItems: "flex-end" }}>
+          <Button
+            style={{ paddingLeft: 50, alignSelf: "stretch" }}
+            color="purple"
+            title="Enter"
+            onPress={async () => {
+              await this.addNewItem();
+              // await this.displayItems();
+            }}
+          />
+        </View>
+      </ScrollView>
+    );
+  }
 }
 
 InputScreen.navigationOptions = {
