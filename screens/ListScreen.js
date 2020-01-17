@@ -1,29 +1,31 @@
 import React, { useState, useEffect } from "react";
 import { List } from "react-native-paper";
+import { AsyncStorage } from "react-native";
 
 export default function ListScreen() {
   const [expanded, setExpanded] = useState(false);
   const [mechanic, setMechanic] = useState("");
   const [theme, setTheme] = useState("");
 
-  useEffect(() => {
-    getMechanic;
-    getTheme;
+  useEffect(async () => {
+    await getMechanic();
+    await getTheme();
   }, []);
 
   getMechanic = async () => {
-    let mechanic = await AsyncStorage.getItem("Mechanic");
+    const mechanic = await AsyncStorage.getItem("Mechanic");
     setMechanic(JSON.parse(mechanic));
     console.warn(JSON.parse(mechanic));
   };
 
   getTheme = async () => {
-    let theme = await AsyncStorage.getItem("Theme");
+    const theme = await AsyncStorage.getItem("Theme");
+    console.log("Theme: ", theme);
     setTheme(JSON.parse(theme));
     console.warn(JSON.parse(theme));
   };
 
-  function itemList(items) {
+  function itemList(items = []) {
     items.map(data => {
       return (
         <View>
@@ -38,7 +40,7 @@ export default function ListScreen() {
         title="MECHANICS"
         left={props => <List.Icon {...props} icon="folder" />}
       >
-        {itemList(mechanic)}
+        {/* {itemList(mechanic)} */}
       </List.Accordion>
 
       <List.Accordion
@@ -49,7 +51,7 @@ export default function ListScreen() {
           setExpanded(!expanded);
         }}
       >
-        {itemList(theme)}
+        {/* {itemList(theme)} */}
       </List.Accordion>
     </List.Section>
   );
