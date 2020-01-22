@@ -1,60 +1,68 @@
-import React, { useState, useEffect } from "react";
+import React, { Component } from "react";
 import { List } from "react-native-paper";
-import { AsyncStorage } from "react-native";
+import { AsyncStorage, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 
-export default function ListScreen() {
-  const [expanded, setExpanded] = useState(false);
-  const [mechanic, setMechanic] = useState("");
-  const [theme, setTheme] = useState("");
-
-  useEffect(async () => {
-    await getMechanic();
-    await getTheme();
-  }, []);
+export default class ListScreen extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      expanded: false,
+      mechanic: [],
+      theme: []
+    };
+  }
 
   getMechanic = async () => {
     const mechanic = await AsyncStorage.getItem("Mechanic");
-    setMechanic(JSON.parse(mechanic));
-    console.warn(JSON.parse(mechanic));
+    this.setState({ mechanic: [...mechanic, JSON.parse(mechanic)] });
+    console.log(mechanic);
   };
 
   getTheme = async () => {
     const theme = await AsyncStorage.getItem("Theme");
-    console.log("Theme: ", theme);
-    setTheme(JSON.parse(theme));
-    console.warn(JSON.parse(theme));
+    this.setState({ theme: [...theme, JSON.parse(theme)] });
   };
 
-  function itemList(items = []) {
-    items.map(data => {
-      return (
-        <View>
-          <List.Item title={data} />
-        </View>
-      );
-    });
-  }
-  return (
-    <List.Section>
-      <List.Accordion
-        title="MECHANICS"
-        left={props => <List.Icon {...props} icon="folder" />}
-      >
-        {/* {itemList(mechanic)} */}
-      </List.Accordion>
+  render() {
+    return (
+      <ScrollView>
+        <List.Section>
+          <List.Accordion
+            title="MECHANICS"
+            onPress={() => {
+              this.getMechanic();
+            }}
+            left={props => <List.Icon {...props} icon="folder" />}
+          >
+            {this.state.mechanic.map(data => {
+              console.log(data);
+              return (
+                <List.Item
+                  style={{ borderColor: "black", borderWidth: 3 }}
+                  title={data.toString()}
+                />
+              );
+            })}
+          </List.Accordion>
 
-      <List.Accordion
-        title="THEMES"
-        left={props => <List.Icon {...props} icon="folder" />}
-        expanded={expanded}
-        onPress={() => {
-          setExpanded(!expanded);
-        }}
-      >
-        {/* {itemList(theme)} */}
-      </List.Accordion>
-    </List.Section>
-  );
+          <List.Accordion
+            title="THEMES"
+            left={props => <List.Icon {...props} icon="folder" />}
+            expanded={this.state.expanded}
+            onPress={() => {
+              this.setState({ expanded: !this.state.expanded });
+              this.getTheme();
+            }}
+          >
+            {this.state.theme.map(data => {
+              return <List.Item title={data} />;
+            })}
+          </List.Accordion>
+        </List.Section>
+      </ScrollView>
+    );
+  }
 }
 
 ListScreen.navigationOptions = {

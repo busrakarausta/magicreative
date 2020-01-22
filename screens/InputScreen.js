@@ -9,13 +9,12 @@ import {
   AsyncStorage
 } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
-import { render } from "react-dom";
 
 export default class InputScreen extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      type: "",
+      type: "Mechanic",
       text: ""
     };
   }
@@ -33,18 +32,11 @@ export default class InputScreen extends Component {
   addNewItem = async () => {
     try {
       const { type, text } = this.state;
-      console.log("Type: ", type);
       let activities = [];
       activities = await AsyncStorage.getItem(type);
       activities = JSON.parse(activities);
       const newActivity = text.toString();
-      if (activities.length > 0) {
-        console.log("activities: ", activities);
-        activities.push(newActivity);
-        await AsyncStorage.setItem(type, JSON.stringify(activities));
-      } else {
-        console.log("newActivity: ", newActivity);
-        console.log("type: ", type);
+      if (activities != null) {
         activities.push(newActivity);
         await AsyncStorage.setItem(type, JSON.stringify(activities));
       }
@@ -57,7 +49,6 @@ export default class InputScreen extends Component {
     try {
       let activities = await AsyncStorage.getItem(type);
       activities = JSON.parse(activities);
-      Alert.alert(activities[0]);
     } catch {
       console.warn(JSON.parse(activities));
     }
@@ -91,7 +82,7 @@ export default class InputScreen extends Component {
             borderColor: "purple",
             alignSelf: "center"
           }}
-          onChangeText={text => this.setState({ text: text })}
+          onChangeText={text => this.setState({ text })}
           value={text}
         />
         <Picker
@@ -119,8 +110,9 @@ export default class InputScreen extends Component {
             color="purple"
             title="Enter"
             onPress={async () => {
+              //this.clearStore();
               await this.addNewItem();
-              // await this.displayItems();
+              //await this.displayItems();
             }}
           />
         </View>

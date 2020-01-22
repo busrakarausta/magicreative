@@ -9,20 +9,18 @@ export default function RandomizeScreen() {
   getMechanic = async () => {
     let mechanic = await AsyncStorage.getItem("Mechanic");
     mechanic = JSON.parse(mechanic);
-    var size = mechanic.size;
+    var size = mechanic.length;
     var count = Math.floor(Math.random() * size);
     console.log(size);
     setMechanic(mechanic[count]);
-    console.warn(mechanic);
   };
 
   getTheme = async () => {
     let theme = await AsyncStorage.getItem("Theme");
     theme = JSON.parse(theme);
-    var size = theme.size;
+    var size = theme.length;
     var count = Math.floor(Math.random() * size);
     setTheme(theme[count]);
-    console.warn(theme);
   };
 
   return (
