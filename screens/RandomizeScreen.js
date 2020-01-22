@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, Text, View, AsyncStorage } from "react-native";
 import { Button } from "react-native-paper";
+
 export default function RandomizeScreen() {
   const [isRandomed, setRandom] = useState(false);
   const [mechanic, setMechanic] = useState("");
@@ -9,18 +10,21 @@ export default function RandomizeScreen() {
   getMechanic = async () => {
     let mechanic = await AsyncStorage.getItem("Mechanic");
     mechanic = JSON.parse(mechanic);
-    var size = mechanic.length;
-    var count = Math.floor(Math.random() * size);
-    console.log(size);
-    setMechanic(mechanic[count]);
+    if (mechanic != null) {
+      var size = mechanic.length;
+      var count = Math.floor(Math.random() * size);
+      setMechanic(mechanic[count]);
+    } else setMechanic("");
   };
 
   getTheme = async () => {
     let theme = await AsyncStorage.getItem("Theme");
     theme = JSON.parse(theme);
-    var size = theme.length;
-    var count = Math.floor(Math.random() * size);
-    setTheme(theme[count]);
+    if (theme != null) {
+      var size = theme.length;
+      var count = Math.floor(Math.random() * size);
+      setTheme(theme[count]);
+    } else setTheme("");
   };
 
   return (
@@ -48,11 +52,23 @@ export default function RandomizeScreen() {
                   alignItems: "center"
                 }}
               >
-                <Text style={{ margin: 15 }}>{mechanic}</Text>
+                {mechanic ? (
+                  <Text style={{ margin: 15 }}>{mechanic}</Text>
+                ) : (
+                  <Text style={{ margin: 25, color: "green" }}>
+                    The Mechanic you have called can not be reached at the
+                    moment please try again after enter one
+                  </Text>
+                )}
               </View>
             </View>
+
             <View
-              style={{ margin: 2, alignItems: "center", alignSelf: "stretch" }}
+              style={{
+                margin: 2,
+                alignItems: "center",
+                alignSelf: "stretch"
+              }}
             >
               <Text style={{ margin: 25 }}>THEME</Text>
               <View
@@ -63,7 +79,14 @@ export default function RandomizeScreen() {
                   alignItems: "center"
                 }}
               >
-                <Text style={{ margin: 15 }}>{theme}</Text>
+                {theme ? (
+                  <Text style={{ margin: 15 }}>{theme}</Text>
+                ) : (
+                  <Text style={{ margin: 25, color: "green" }}>
+                    The Theme you have called can not be reached at the moment
+                    please try again after enter one
+                  </Text>
+                )}
               </View>
             </View>
           </View>

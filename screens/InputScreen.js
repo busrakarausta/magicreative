@@ -15,31 +15,21 @@ export default class InputScreen extends Component {
     super(props);
     this.state = {
       type: "Mechanic",
-      text: ""
+      text: "",
+      activities: []
     };
   }
-
-  async componentDidMount() {
-    await this.initialize();
-  }
-
-  initialize = async () => {
-    let newActivity = [];
-    await AsyncStorage.setItem("Mechanic", JSON.stringify(newActivity));
-    await AsyncStorage.setItem("Theme", JSON.stringify(newActivity));
-  };
 
   addNewItem = async () => {
     try {
       const { type, text } = this.state;
-      let activities = [];
-      activities = await AsyncStorage.getItem(type);
-      activities = JSON.parse(activities);
       const newActivity = text.toString();
-      if (activities != null) {
-        activities.push(newActivity);
-        await AsyncStorage.setItem(type, JSON.stringify(activities));
-      }
+      await AsyncStorage.getItem(type).then(activities => {
+        const c = activities ? JSON.parse(activities) : [];
+        c.push(newActivity);
+        AsyncStorage.setItem(type, JSON.stringify(c));
+        console.log(JSON.stringify(c));
+      });
     } catch (error) {
       console.warn(error);
     }
@@ -54,9 +44,7 @@ export default class InputScreen extends Component {
     }
   };
 
-  clearStore = () => {
-    AsyncStorage.clear();
-  };
+
 
   render() {
     const { text, type } = this.state;

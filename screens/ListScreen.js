@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { List } from "react-native-paper";
-import { AsyncStorage, View } from "react-native";
+import { AsyncStorage, View, Button } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 
 export default class ListScreen extends Component {
@@ -15,18 +15,32 @@ export default class ListScreen extends Component {
 
   getMechanic = async () => {
     const mechanic = await AsyncStorage.getItem("Mechanic");
-    this.setState({ mechanic: [...mechanic, JSON.parse(mechanic)] });
+    this.setState({ mechanic: JSON.parse(mechanic) });
     console.log(mechanic);
   };
 
   getTheme = async () => {
     const theme = await AsyncStorage.getItem("Theme");
-    this.setState({ theme: [...theme, JSON.parse(theme)] });
+    this.setState({ theme: JSON.parse(theme) });
+  };
+
+  clearStore = type => {
+    AsyncStorage.removeItem(type);
   };
 
   render() {
     return (
       <ScrollView>
+        <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
+          <Button
+            onPress={() => this.clearStore("Mechanic")}
+            title="Clear All Mechanics"
+          ></Button>
+          <Button
+            onPress={() => this.clearStore("Theme")}
+            title="Clear All Themes"
+          ></Button>
+        </View>
         <List.Section>
           <List.Accordion
             title="MECHANICS"
@@ -35,15 +49,21 @@ export default class ListScreen extends Component {
             }}
             left={props => <List.Icon {...props} icon="folder" />}
           >
-            {this.state.mechanic.map(data => {
-              console.log(data);
-              return (
-                <List.Item
-                  style={{ borderColor: "black", borderWidth: 3 }}
-                  title={data.toString()}
-                />
-              );
-            })}
+            {this.state.mechanic
+              ? this.state.mechanic.map((data, i) => {
+                  return (
+                    <List.Item
+                      key={i}
+                      style={{
+                        borderColor: "purple",
+                        borderWidth: 1.5,
+                        margin: 1
+                      }}
+                      title={data}
+                    />
+                  );
+                })
+              : null}
           </List.Accordion>
 
           <List.Accordion
@@ -55,9 +75,11 @@ export default class ListScreen extends Component {
               this.getTheme();
             }}
           >
-            {this.state.theme.map(data => {
-              return <List.Item title={data} />;
-            })}
+            {this.state.theme
+              ? this.state.theme.map((data, i) => {
+                  return <List.Item key={i} title={data} />;
+                })
+              : null}
           </List.Accordion>
         </List.Section>
       </ScrollView>
