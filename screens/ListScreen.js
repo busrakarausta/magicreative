@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { List } from "react-native-paper";
 import { AsyncStorage, View, Button } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
+import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 
 export default class ListScreen extends Component {
   constructor(props) {
@@ -31,6 +31,7 @@ export default class ListScreen extends Component {
   render() {
     return (
       <ScrollView>
+        
         <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
           <Button
             onPress={() => this.clearStore("Mechanic")}
@@ -41,6 +42,7 @@ export default class ListScreen extends Component {
             title="Clear All Themes"
           ></Button>
         </View>
+
         <List.Section>
           <List.Accordion
             title="MECHANICS"
@@ -55,10 +57,12 @@ export default class ListScreen extends Component {
                     <List.Item
                       key={i}
                       style={{
-                        borderColor: "purple",
-                        borderWidth: 1.5,
-                        margin: 1
+                        margin: 2,
+                        color: "white"
                       }}
+                      borderless={true}
+                      rippleColor="orange"
+                      underlayColor="orange"
                       title={data}
                     />
                   );
@@ -77,7 +81,17 @@ export default class ListScreen extends Component {
           >
             {this.state.theme
               ? this.state.theme.map((data, i) => {
-                  return <List.Item key={i} title={data} />;
+                  return (
+                    <TouchableOpacity
+                      key={i}
+                      style={{
+                        paddingLeft: 0
+                      }}
+                      underlayColor={"orange"}
+                    >
+                      <List.Item key={i} title={data} />
+                    </TouchableOpacity>
+                  );
                 })
               : null}
           </List.Accordion>

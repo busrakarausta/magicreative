@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import {
-  ScrollView,
   StyleSheet,
   Picker,
   Button,
@@ -27,36 +26,26 @@ export default class InputScreen extends Component {
       await AsyncStorage.getItem(type).then(activities => {
         const c = activities ? JSON.parse(activities) : [];
         c.push(newActivity);
-        AsyncStorage.setItem(type, JSON.stringify(c));
-        console.log(JSON.stringify(c));
+        AsyncStorage.setItem(type, JSON.stringify(c)).then(this.displayItems());
       });
     } catch (error) {
       console.warn(error);
     }
   };
 
-  displayItems = async () => {
+  displayItems = () => {
     try {
-      let activities = await AsyncStorage.getItem(type);
-      activities = JSON.parse(activities);
+      const newActivity = this.state.text.toString();
+      Alert.alert(newActivity + " added!!");
     } catch {
       console.warn(JSON.parse(activities));
     }
   };
 
-
-
   render() {
     const { text, type } = this.state;
     return (
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={{
-          flex: 1,
-          flexDirection: "column",
-          justifyContent: "flex-start"
-        }}
-      >
+      <View style={styles.container}>
         <TextInput
           style={{
             height: 40,
@@ -85,7 +74,6 @@ export default class InputScreen extends Component {
             alignSelf: "center"
           }}
           onValueChange={itemValue => {
-            console.log("onValueChange: ", itemValue);
             this.setState({ type: itemValue });
           }}
         >
@@ -94,17 +82,13 @@ export default class InputScreen extends Component {
         </Picker>
         <View style={{ padding: 20, alignItems: "flex-end" }}>
           <Button
-            style={{ paddingLeft: 50, alignSelf: "stretch" }}
+            style={{ width: 100 }}
             color="purple"
             title="Enter"
-            onPress={async () => {
-              //this.clearStore();
-              await this.addNewItem();
-              //await this.displayItems();
-            }}
+            onPress={this.addNewItem}
           />
         </View>
-      </ScrollView>
+      </View>
     );
   }
 }
@@ -117,6 +101,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 15,
-    backgroundColor: "#fff"
+    backgroundColor: "#fff",
+    flexDirection: "column",
+    justifyContent: "center"
   }
 });
