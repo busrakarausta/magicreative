@@ -47,32 +47,13 @@ export default class InputScreen extends Component {
     return (
       <View style={styles.container}>
         <TextInput
-          style={{
-            height: 40,
-            width: 250,
-            borderColor: "gray",
-            borderWidth: 1,
-            margin: 35,
-            paddingLeft: 10,
-            borderRadius: 10,
-            borderWidth: 2,
-            borderColor: "purple",
-            alignSelf: "center"
-          }}
+          style={styles.textInput}
           onChangeText={text => this.setState({ text })}
           value={text}
         />
         <Picker
           selectedValue={type}
-          style={{
-            height: 50,
-            width: 200,
-            margin: 15,
-            borderRadius: 50,
-            borderWidth: 15,
-            borderColor: "purple",
-            alignSelf: "center"
-          }}
+          style={styles.picker}
           onValueChange={itemValue => {
             this.setState({ type: itemValue });
           }}
@@ -80,9 +61,9 @@ export default class InputScreen extends Component {
           <Picker.Item label="Mechanic" value="Mechanic" />
           <Picker.Item label="Theme" value="Theme" />
         </Picker>
-        <View style={{ padding: 20, alignItems: "flex-end" }}>
+        <View style={styles.buttonContainer}>
           <Button
-            style={{ width: 100 }}
+            style={styles.button}
             color="purple"
             title="Enter"
             onPress={this.addNewItem}
@@ -104,5 +85,33 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     flexDirection: "column",
     justifyContent: "center"
+  },
+  textInput: {
+    height: 40,
+    width: 250,
+    borderColor: "gray",
+    borderWidth: 1,
+    margin: 35,
+    paddingLeft: 10,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: "purple",
+    alignSelf: "center"
+  },
+  picker: {
+    height: 50,
+    width: 200,
+    margin: 15,
+    borderRadius: 50,
+    borderWidth: 15,
+    borderColor: "purple",
+    alignSelf: "center"
+  },
+  buttonContainer: {
+    padding: 20,
+    alignItems: "flex-end"
+  },
+  button: {
+    width: 100
   }
 });

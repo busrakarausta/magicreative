@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import { List } from "react-native-paper";
-import { AsyncStorage, View, Button } from "react-native";
-import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
+import { AsyncStorage, View, Button, Alert } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
+import ListItem from "../components/ListComponents/ListItem";
 
 export default class ListScreen extends Component {
   constructor(props) {
@@ -9,29 +10,49 @@ export default class ListScreen extends Component {
     this.state = {
       expanded: false,
       mechanic: [],
-      theme: []
+      theme: [],
+      favourite: []
     };
   }
 
-  getMechanic = async () => {
-    const mechanic = await AsyncStorage.getItem("Mechanic");
-    this.setState({ mechanic: JSON.parse(mechanic) });
-    console.log(mechanic);
-  };
-
-  getTheme = async () => {
-    const theme = await AsyncStorage.getItem("Theme");
-    this.setState({ theme: JSON.parse(theme) });
+  getData = async tag => {
+    const data = await AsyncStorage.getItem(tag);
+    if (tag == "Mechanic") {
+      this.setState({ mechanic: JSON.parse(data) });
+    } else if (tag == "Theme") {
+      this.setState({ theme: JSON.parse(data) });
+    } else if (tag == "Favourite") {
+      this.setState({ favourite: JSON.parse(data) });
+    }
   };
 
   clearStore = type => {
     AsyncStorage.removeItem(type);
   };
 
+  removeItem = async (i, tag) => {
+    const { mechanic, theme, favourite } = this.state;
+    if (tag == "Mechanic") {
+      this.setItem(mechanic, tag, i);
+    } else if (tag == "Theme") {
+      this.setItem(theme, tag, i);
+    } else if (tag == "Favourite") {
+      this.setItem(favourite, tag, i);
+    }
+  };
+
+  setItem = async (data, tag, i) => {
+    let newData = [...data];
+    newData.splice(i, 1);
+    newData = newData ? newData : [];
+    await AsyncStorage.setItem(tag, JSON.stringify(newData)).then(
+      Alert.alert("item removed")
+    );
+  };
+
   render() {
     return (
       <ScrollView>
-        
         <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
           <Button
             onPress={() => this.clearStore("Mechanic")}
@@ -47,23 +68,19 @@ export default class ListScreen extends Component {
           <List.Accordion
             title="MECHANICS"
             onPress={() => {
-              this.getMechanic();
+              this.getData("Mechanic");
             }}
             left={props => <List.Icon {...props} icon="folder" />}
           >
             {this.state.mechanic
               ? this.state.mechanic.map((data, i) => {
                   return (
-                    <List.Item
+                    <ListItem
                       key={i}
-                      style={{
-                        margin: 2,
-                        color: "white"
-                      }}
-                      borderless={true}
-                      rippleColor="orange"
-                      underlayColor="orange"
                       title={data}
+                      onPress={() => {
+                        this.removeItem(i, "Mechanic");
+                      }}
                     />
                   );
                 })
@@ -76,21 +93,48 @@ export default class ListScreen extends Component {
             expanded={this.state.expanded}
             onPress={() => {
               this.setState({ expanded: !this.state.expanded });
-              this.getTheme();
+              this.getData("Theme");
             }}
           >
             {this.state.theme
               ? this.state.theme.map((data, i) => {
                   return (
-                    <TouchableOpacity
+                    <ListItem
                       key={i}
-                      style={{
-                        paddingLeft: 0
+                      title={data}
+                      onPress={() => {
+                        this.removeItem(i, "Theme");
                       }}
-                      underlayColor={"orange"}
-                    >
-                      <List.Item key={i} title={data} />
-                    </TouchableOpacity>
+                    />
+                  );
+                })
+              : null}
+          </List.Accordion>
+
+          <List.Accordion
+            title="Favourites"
+            left={props => <List.Icon {...props} icon="folder" />}
+            onPress={() => {
+              this.getData("Favourite");
+            }}
+          >
+            {this.state.favourite
+              ? this.state.favourite.map((data, i) => {
+                  return (
+                    <ListItem
+                      key={i}
+                      title={data.tag}
+                      description={
+                        "Mechanic : " +
+                        data.mechanic +
+                        "\n" +
+                        "Theme : " +
+                        data.theme
+                      }
+                      onPress={() => {
+                        this.removeItem(i, "Favourite");
+                      }}
+                    />
                   );
                 })
               : null}

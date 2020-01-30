@@ -1,30 +1,52 @@
 import React, { useState } from "react";
-import { ScrollView, StyleSheet, Text, View, AsyncStorage } from "react-native";
+import { ScrollView, View, AsyncStorage, Alert } from "react-native";
 import { Button } from "react-native-paper";
+import styles from "./Styles/RandomStyle";
+import RandomCard from "./Component/RandomCard";
+import FavouriteModal from "./Component/FavouriteModal";
 
 export default function RandomizeScreen() {
   const [isRandomed, setRandom] = useState(false);
   const [mechanic, setMechanic] = useState("");
   const [theme, setTheme] = useState("");
+  const [tag, setTag] = useState("");
+  const [isModalVisible, setModalVisible] = useState(false);
 
-  getMechanic = async () => {
-    let mechanic = await AsyncStorage.getItem("Mechanic");
-    mechanic = JSON.parse(mechanic);
-    if (mechanic != null) {
-      var size = mechanic.length;
-      var count = Math.floor(Math.random() * size);
-      setMechanic(mechanic[count]);
-    } else setMechanic("");
+  clearStore = () => {
+    AsyncStorage.removeItem("Favourite");
   };
 
-  getTheme = async () => {
-    let theme = await AsyncStorage.getItem("Theme");
-    theme = JSON.parse(theme);
-    if (theme != null) {
-      var size = theme.length;
+  addNewFavourite = async () => {
+    const newFavourite = { theme: theme, mechanic: mechanic, tag: tag };
+    await AsyncStorage.getItem("Favourite").then(favourite => {
+      const c = favourite ? JSON.parse(favourite) : [];
+      c.push(newFavourite);
+      AsyncStorage.setItem("Favourite", JSON.stringify(c)).then(() => {
+        console.log(c);
+        Alert.alert("This combination is added to your favourites");
+        setModalVisible(false);
+      });
+    });
+  };
+
+  getData = async tag => {
+    let data = await AsyncStorage.getItem(tag);
+    data = JSON.parse(data);
+    if (data != null) {
+      var size = data.length;
       var count = Math.floor(Math.random() * size);
-      setTheme(theme[count]);
-    } else setTheme("");
+      if (tag == "Theme") {
+        setTheme(data[count]);
+      } else if (tag == "Mechanic") {
+        setMechanic(data[count]);
+      }
+    } else {
+      if (tag == "Theme") {
+        setTheme("");
+      } else if (tag == "Mechanic") {
+        setMechanic("");
+      }
+    }
   };
 
   return (
@@ -35,78 +57,59 @@ export default function RandomizeScreen() {
       >
         {isRandomed ? (
           <View style={{ alignItems: "center", justifyContent: "center" }}>
-            <View
-              style={{
-                margin: 2,
-                marginBottom: 30,
-                alignItems: "center",
-                alignSelf: "stretch"
-              }}
-            >
-              <Text style={{ margin: 25 }}>MECHANIC</Text>
-              <View
-                style={{
-                  borderWidth: 2,
-                  borderColor: "purple",
-                  alignSelf: "stretch",
-                  alignItems: "center"
+            <View>
+              <FavouriteModal
+                tag={tag}
+                isModalVisible={isModalVisible}
+                onChangeText={text => setTag(text)}
+                onPress={() => {
+                  this.addNewFavourite();
+                }}
+              />
+              <Button
+                icon="heart"
+                mode="contained"
+                onPress={() => {
+                  setModalVisible(true);
                 }}
               >
-                {mechanic ? (
-                  <Text style={{ margin: 15 }}>{mechanic}</Text>
-                ) : (
-                  <Text style={{ margin: 25, color: "green" }}>
-                    The Mechanic you have called can not be reached at the
-                    moment please try again after enter one
-                  </Text>
-                )}
-              </View>
+                Add Favourite
+              </Button>
             </View>
-
-            <View
-              style={{
-                margin: 2,
-                alignItems: "center",
-                alignSelf: "stretch"
+            <RandomCard
+              title="Mechanic"
+              data={mechanic}
+              onPress={() => {
+                getData("Mechanic");
               }}
-            >
-              <Text style={{ margin: 25 }}>THEME</Text>
-              <View
-                style={{
-                  borderWidth: 2,
-                  borderColor: "purple",
-                  alignSelf: "stretch",
-                  alignItems: "center"
-                }}
-              >
-                {theme ? (
-                  <Text style={{ margin: 15 }}>{theme}</Text>
-                ) : (
-                  <Text style={{ margin: 25, color: "green" }}>
-                    The Theme you have called can not be reached at the moment
-                    please try again after enter one
-                  </Text>
-                )}
-              </View>
-            </View>
+            />
+            <RandomCard
+              title="Theme"
+              data={theme}
+              onPress={() => {
+                getData("Theme");
+              }}
+            />
           </View>
         ) : null}
-        <View style={{ alignSelf: "center", margin: 20, alignItems: "center" }}>
-          <Button
-            raised
-            theme={{ roundness: 3 }}
-            mode="contained"
-            style={{ padding: 2 }}
-            color="purple"
-            onPress={() => {
-              setRandom(true);
-              getMechanic();
-              getTheme();
-            }}
-          >
-            Randomize
-          </Button>
-        </View>
+        {!isRandomed ? (
+          <View style={styles.rand}>
+            <Button
+              raised
+              theme={{ roundness: 3 }}
+              mode="contained"
+              style={styles.randomButton}
+              color="purple"
+              onPress={() => {
+                setRandom(true);
+                getData("Mechanic");
+                getData("Theme");
+              }}
+            >
+              Randomize
+            </Button>
+          </View>
+        ) : null}
       </ScrollView>
     </View>
   );
@@ -115,15 +118,3 @@ export default function RandomizeScreen() {
 RandomizeScreen.navigationOptions = {
   title: "Random"
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff"
-  },
-  contentContainer: {
-    flex: 1,
-    justifyContent: "space-around",
-    paddingTop: 30
-  }
-});
